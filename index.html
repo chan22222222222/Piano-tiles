@@ -107,23 +107,22 @@
       font-weight: bold;
       margin: 10px 0;
     }
-    /* The game board will adjust to available width while keeping its ratio */
+    /* Game board using aspect-ratio (2:3) */
     #game {
       position: relative;
       margin: 20px auto;
       width: 90%;
       max-width: 320px;
-      height: calc(90% * (480 / 320));
-      max-height: 480px;
       background: #fff;
       border: 2px solid #ccc;
       overflow: hidden;
+      aspect-ratio: 2 / 3;
     }
-    /* Each row is based on the game width */
+    /* Each row is 16.67% of the game height (approx. 80px when 480px tall) */
     .row {
       position: absolute;
       width: 100%;
-      height: 25%; /* 80px/320px ratio */
+      height: 16.67%;
       display: flex;
       left: 0;
     }
@@ -227,7 +226,7 @@
       <div id="localMusicDiv" style="margin-top:10px;">
         <!-- Default now set to "Canon in D - Pachelbel. mp3" -->
         <select id="localMusicSelect">
-          <option value="Canon in D - Pachelbel. mp3">Canon in D - Pachelbel</option>
+          <option value="Canon in D - Pachelbel.mp3">Canon in D - Pachelbel</option>
           <option value="song2.mp3">Song 2</option>
           <option value="song3.mp3">Song 3</option>
         </select>
@@ -471,11 +470,13 @@
     function spawnRow() {
       const rowEl = document.createElement('div');
       rowEl.className = 'row';
-      const blackIndex = Math.floor(Math.random() * 4);
+      // Set starting top as negative one row height (16.67% of gameDiv height)
+      rowEl.style.top = '-16.67%';
+      const gameHeight = gameDiv.clientHeight;
       for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'tile';
-        if (i === blackIndex) {
+        if (i === Math.floor(Math.random() * 4)) {
           tile.classList.add('black');
           tile.addEventListener('pointerdown', () => {
             if (!gameOver && !tile.classList.contains('cleared')) {
@@ -487,6 +488,7 @@
               // Play the selected piano note on tile click
               tileSound.currentTime = 0;
               tileSound.play().catch(err => console.error("Tile sound error:", err));
+              // Optionally, show a random lyric overlay
               const lyrics = ["La", "Da", "Ti", "Mi", "So", "Fa", "Re", "Do"];
               const randomLyric = lyrics[Math.floor(Math.random() * lyrics.length)];
               const lyricSpan = document.createElement('span');
@@ -508,16 +510,19 @@
         } else {
           tile.addEventListener('pointerdown', () => {
             if (!gameOver) {
-              endGame('You clicked a white tile!');
+              // For wrong click, change background to red and end game after a brief delay
+              tile.style.backgroundColor = 'red';
+              setTimeout(() => {
+                endGame('You clicked a white tile!');
+              }, 300);
             }
           });
         }
         rowEl.appendChild(tile);
       }
-      // Adjust starting top based on game height (using relative percentage)
-      rowEl.style.top = '-25%';
       gameDiv.appendChild(rowEl);
-      rows.push({ el: rowEl, y: -parseFloat(getComputedStyle(gameDiv).height) * 0.25 });
+      // Push initial y position (in pixels) based on gameDiv height
+      rows.push({ el: rowEl, y: -gameDiv.clientHeight * 0.1667 });
     }
     
     function gameLoop() {
@@ -589,11 +594,11 @@
       
       setDifficultySettings(difficulty);
       
-      // Set the tile sound based on the selected music
+      // Set the tile sound based on the selected music source and song
       const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
       if (selectedMusicSource === 'local') {
         const selectedSong = document.getElementById('localMusicSelect').value;
-        if(selectedSong === "Canon in D - Pachelbel. mp3"){
+        if(selectedSong === "Canon in D - Pachelbel.mp3"){
           tileSound.src = "canon_note.mp3";
         } else {
           tileSound.src = "default_note.mp3";
