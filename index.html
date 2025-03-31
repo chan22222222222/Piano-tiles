@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>C. Iso Piano Tiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
       margin: 0;
@@ -23,6 +24,7 @@
       height: 100vh;
       background: #eee;
       text-align: center;
+      padding: 0 10px;
     }
     #homepage h1 {
       font-size: 48px;
@@ -37,11 +39,12 @@
     #menu {
       display: none; /* Hidden until homepage is dismissed */
       max-width: 400px;
-      margin: 50px auto;
+      margin: 30px auto;
       padding: 20px;
       background: #fff;
       border: 2px solid #ccc;
       text-align: center;
+      width: 90%;
     }
     #menu h1, #menu h2 {
       margin-bottom: 10px;
@@ -96,6 +99,7 @@
     #gameContainer {
       display: none;
       text-align: center;
+      padding: 10px;
     }
     /* Highest score display */
     #highScore {
@@ -103,20 +107,23 @@
       font-weight: bold;
       margin: 10px 0;
     }
+    /* The game board will adjust to available width while keeping its ratio */
     #game {
       position: relative;
       margin: 20px auto;
-      width: 320px;   /* 4 columns × 80px each */
-      height: 480px;
-      overflow: hidden;
+      width: 90%;
+      max-width: 320px;
+      height: calc(90% * (480 / 320));
+      max-height: 480px;
       background: #fff;
       border: 2px solid #ccc;
+      overflow: hidden;
     }
-    /* Each row is 80px tall; 4 equal columns */
+    /* Each row is based on the game width */
     .row {
       position: absolute;
       width: 100%;
-      height: 80px;
+      height: 25%; /* 80px/320px ratio */
       display: flex;
       left: 0;
     }
@@ -159,11 +166,38 @@
     /* Background music styling */
     #bgMusic {
       margin-top: 10px;
-      width: 300px;
+      width: 90%;
+      max-width: 300px;
     }
     /* Hide tile sound controls */
     #tileSound {
       display: none;
+    }
+    /* Mobile specific adjustments */
+    @media (max-width: 480px) {
+      #homepage h1 {
+        font-size: 36px;
+      }
+      #homepage button {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
+      #menu h1 {
+        font-size: 24px;
+      }
+      #menu h2 {
+        font-size: 20px;
+      }
+      #playerNameDiv input {
+        font-size: 14px;
+      }
+      button {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+      #highScore, #score, #message {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -479,9 +513,10 @@
         }
         rowEl.appendChild(tile);
       }
-      rowEl.style.top = '-80px';
+      // Adjust starting top based on game height (using relative percentage)
+      rowEl.style.top = '-25%';
       gameDiv.appendChild(rowEl);
-      rows.push({ el: rowEl, y: -80 });
+      rows.push({ el: rowEl, y: -parseFloat(getComputedStyle(gameDiv).height) * 0.25 });
     }
     
     function gameLoop() {
@@ -490,7 +525,7 @@
       rows.forEach(rowData => {
         rowData.y += dynamicSpeed;
         rowData.el.style.top = rowData.y + 'px';
-        if (rowData.y >= 480) {
+        if (rowData.y >= gameDiv.clientHeight) {
           const blackTile = rowData.el.querySelector('.black');
           if (!blackTile || !blackTile.classList.contains('cleared')) {
             endGame('You missed a black tile!');
@@ -498,7 +533,7 @@
         }
       });
       rows = rows.filter(rowData => {
-        if (rowData.y > 600) {
+        if (rowData.y > gameDiv.clientHeight + 100) {
           gameDiv.removeChild(rowData.el);
           return false;
         }
