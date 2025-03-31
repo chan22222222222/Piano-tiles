@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>C. Iso Piano Tiles</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano Tiles Game</title>
   <style>
     * {
       margin: 0;
@@ -15,22 +14,22 @@
       background: #eee;
       user-select: none;
     }
-    /* Homepage styles */
-    #homepage {
+    /* Home Page Styles */
+    #home {
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
       background: linear-gradient(to bottom right, skyblue, white, silver);
       text-align: center;
-      padding: 0 10px;
     }
-    #homepage h1 {
+    #home h1 {
       font-size: 48px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       margin-bottom: 20px;
     }
-    #homepage button {
+    #home button {
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
@@ -41,14 +40,13 @@
     }
     /* Menu styles */
     #menu {
-      display: none; /* Hidden until homepage is dismissed */
+      display: none; /* Hidden until "Enter the Game" is clicked */
       max-width: 400px;
-      margin: 30px auto;
+      margin: 50px auto;
       padding: 20px;
       background: #fff;
       border: 2px solid #ccc;
       text-align: center;
-      width: 90%;
     }
     #menu h1, #menu h2 {
       margin-bottom: 10px;
@@ -103,7 +101,6 @@
     #gameContainer {
       display: none;
       text-align: center;
-      padding: 10px;
     }
     /* Highest score display */
     #highScore {
@@ -111,22 +108,20 @@
       font-weight: bold;
       margin: 10px 0;
     }
-    /* Game board using aspect-ratio (2:3) */
     #game {
       position: relative;
       margin: 20px auto;
-      width: 90%;
-      max-width: 320px;
+      width: 320px;   /* 4 columns × 80px each */
+      height: 480px;
+      overflow: hidden;
       background: #fff;
       border: 2px solid #ccc;
-      overflow: hidden;
-      aspect-ratio: 2 / 3;
     }
-    /* Each row is 16.67% of the game height (approx. 80px when 480px tall) */
+    /* Each row is 80px tall; 4 equal columns */
     .row {
       position: absolute;
       width: 100%;
-      height: 16.67%;
+      height: 80px;
       display: flex;
       left: 0;
     }
@@ -169,47 +164,21 @@
     /* Background music styling */
     #bgMusic {
       margin-top: 10px;
-      width: 90%;
-      max-width: 300px;
+      width: 300px;
     }
     /* Hide tile sound controls */
     #tileSound {
       display: none;
     }
-    /* Mobile specific adjustments */
-    @media (max-width: 480px) {
-      #homepage h1 {
-        font-size: 36px;
-      }
-      #homepage button {
-        font-size: 16px;
-        padding: 8px 16px;
-      }
-      #menu h1 {
-        font-size: 24px;
-      }
-      #menu h2 {
-        font-size: 20px;
-      }
-      #playerNameDiv input {
-        font-size: 14px;
-      }
-      button {
-        font-size: 14px;
-        padding: 6px 12px;
-      }
-      #highScore, #score, #message {
-        font-size: 16px;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- Homepage -->
-  <div id="homepage">
+  <!-- Home Page -->
+  <div id="home">
     <h1>C. Iso Piano Tiles</h1>
-    <button id="enterBtn">Enter</button>
+    <button id="enterBtn">Enter the Game</button>
   </div>
+
   <!-- Start Menu -->
   <div id="menu">
     <h1>Piano Tiles Game</h1>
@@ -228,9 +197,9 @@
       <label><input type="radio" name="musicSource" value="local" checked> Local Library</label>
       <label><input type="radio" name="musicSource" value="youtube"> YouTube URL</label>
       <div id="localMusicDiv" style="margin-top:10px;">
-        <!-- Default now set to "Canon in D - Pachelbel.mp3" -->
+        <!-- Default now set to "Canon in D - Pachelbel. mp3" -->
         <select id="localMusicSelect">
-          <option value="Canon in D - Pachelbel.mp3">Canon in D - Pachelbel</option>
+          <option value="Canon in D - Pachelbel. mp3">Canon in D - Pachelbel</option>
           <option value="song2.mp3">Song 2</option>
           <option value="song3.mp3">Song 3</option>
         </select>
@@ -269,6 +238,17 @@
 
   <script>
     /**********************
+     *  HOME PAGE TRANSITION
+     **********************/
+    const home = document.getElementById('home');
+    const enterBtn = document.getElementById('enterBtn');
+    const menu = document.getElementById('menu');
+    enterBtn.addEventListener('pointerdown', () => {
+      home.style.display = 'none';
+      menu.style.display = 'block';
+    });
+
+    /**********************
      *  GLOBAL MODE VARIABLES
      **********************/
     let currentMode = "easy"; 
@@ -280,9 +260,6 @@
     /**********************
      *  DOM ELEMENTS
      **********************/
-    const homepage = document.getElementById('homepage');
-    const enterBtn = document.getElementById('enterBtn');
-    const menu = document.getElementById('menu');
     const startBtn = document.getElementById('startBtn');
     const localMusicDiv = document.getElementById('localMusicDiv');
     const youtubeMusicDiv = document.getElementById('youtubeMusicDiv');
@@ -300,12 +277,6 @@
     const tileSound = document.getElementById('tileSound');
     const youtubePlayer = document.getElementById('youtubePlayer');
     const playerNameInput = document.getElementById('playerNameInput');
-    
-    // Event listener for homepage "Enter" button
-    enterBtn.addEventListener('pointerdown', () => {
-      homepage.style.display = 'none';
-      menu.style.display = 'block';
-    });
     
     /**********************
      *  HISTORY MANAGEMENT (Mode-Specific)
@@ -474,13 +445,11 @@
     function spawnRow() {
       const rowEl = document.createElement('div');
       rowEl.className = 'row';
-      // Set starting top as negative one row height (16.67% of gameDiv height)
-      rowEl.style.top = '-16.67%';
-      const gameHeight = gameDiv.clientHeight;
+      const blackIndex = Math.floor(Math.random() * 4);
       for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'tile';
-        if (i === Math.floor(Math.random() * 4)) {
+        if (i === blackIndex) {
           tile.classList.add('black');
           tile.addEventListener('pointerdown', () => {
             if (!gameOver && !tile.classList.contains('cleared')) {
@@ -489,10 +458,8 @@
               scoreDisplay.textContent = 'Score: ' + score;
               checkAndUpdateHighScore(score);
               updateHighScoreDisplay();
-              // Play the tile sound on click
               tileSound.currentTime = 0;
               tileSound.play().catch(err => console.error("Tile sound error:", err));
-              // Optionally, show a random lyric overlay
               const lyrics = ["La", "Da", "Ti", "Mi", "So", "Fa", "Re", "Do"];
               const randomLyric = lyrics[Math.floor(Math.random() * lyrics.length)];
               const lyricSpan = document.createElement('span');
@@ -514,17 +481,15 @@
         } else {
           tile.addEventListener('pointerdown', () => {
             if (!gameOver) {
-              tile.style.backgroundColor = 'red';
-              setTimeout(() => {
-                endGame('You clicked a white tile!');
-              }, 300);
+              endGame('You clicked a white tile!');
             }
           });
         }
         rowEl.appendChild(tile);
       }
+      rowEl.style.top = '-80px';
       gameDiv.appendChild(rowEl);
-      rows.push({ el: rowEl, y: -gameDiv.clientHeight * 0.1667 });
+      rows.push({ el: rowEl, y: -80 });
     }
     
     function gameLoop() {
@@ -533,7 +498,7 @@
       rows.forEach(rowData => {
         rowData.y += dynamicSpeed;
         rowData.el.style.top = rowData.y + 'px';
-        if (rowData.y >= gameDiv.clientHeight) {
+        if (rowData.y >= 480) {
           const blackTile = rowData.el.querySelector('.black');
           if (!blackTile || !blackTile.classList.contains('cleared')) {
             endGame('You missed a black tile!');
@@ -541,7 +506,7 @@
         }
       });
       rows = rows.filter(rowData => {
-        if (rowData.y > gameDiv.clientHeight + 100) {
+        if (rowData.y > 600) {
           gameDiv.removeChild(rowData.el);
           return false;
         }
@@ -586,7 +551,6 @@
       updateHighScoreDisplay();
     });
     
-    // Start Game: Removed tileSound source update using "canon_note.mp3" and "default_note.mp3"
     startBtn.addEventListener('pointerdown', () => {
       const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
       currentMode = difficulty;
@@ -595,7 +559,6 @@
       currentPlayerName = playerNameInput.value.trim() || "Anonymous";
       
       setDifficultySettings(difficulty);
-      
       menu.style.display = 'none';
       gameContainer.style.display = 'block';
       startMusic();
