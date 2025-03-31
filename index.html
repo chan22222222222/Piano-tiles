@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Piano Tiles Game</title>
+  <title>C. Iso Piano Tiles</title>
   <style>
     * {
       margin: 0;
@@ -14,33 +14,28 @@
       background: #eee;
       user-select: none;
     }
-    /* Home Page Styles */
-    #home {
+    /* Homepage styles */
+    #homepage {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
-      background: linear-gradient(to bottom right, skyblue, white, silver);
+      background: #eee;
       text-align: center;
     }
-    #home h1 {
+    #homepage h1 {
       font-size: 48px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       margin-bottom: 20px;
     }
-    #home button {
+    #homepage button {
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
-      background-color: white;
-      border: 2px solid silver;
-      border-radius: 4px;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
     /* Menu styles */
     #menu {
-      display: none; /* Hidden until "Enter the Game" is clicked */
+      display: none; /* Hidden until homepage is dismissed */
       max-width: 400px;
       margin: 50px auto;
       padding: 20px;
@@ -173,12 +168,11 @@
   </style>
 </head>
 <body>
-  <!-- Home Page -->
-  <div id="home">
+  <!-- Homepage -->
+  <div id="homepage">
     <h1>C. Iso Piano Tiles</h1>
-    <button id="enterBtn">Enter the Game</button>
+    <button id="enterBtn">Enter</button>
   </div>
-
   <!-- Start Menu -->
   <div id="menu">
     <h1>Piano Tiles Game</h1>
@@ -238,17 +232,6 @@
 
   <script>
     /**********************
-     *  HOME PAGE TRANSITION
-     **********************/
-    const home = document.getElementById('home');
-    const enterBtn = document.getElementById('enterBtn');
-    const menu = document.getElementById('menu');
-    enterBtn.addEventListener('pointerdown', () => {
-      home.style.display = 'none';
-      menu.style.display = 'block';
-    });
-
-    /**********************
      *  GLOBAL MODE VARIABLES
      **********************/
     let currentMode = "easy"; 
@@ -260,6 +243,9 @@
     /**********************
      *  DOM ELEMENTS
      **********************/
+    const homepage = document.getElementById('homepage');
+    const enterBtn = document.getElementById('enterBtn');
+    const menu = document.getElementById('menu');
     const startBtn = document.getElementById('startBtn');
     const localMusicDiv = document.getElementById('localMusicDiv');
     const youtubeMusicDiv = document.getElementById('youtubeMusicDiv');
@@ -277,6 +263,12 @@
     const tileSound = document.getElementById('tileSound');
     const youtubePlayer = document.getElementById('youtubePlayer');
     const playerNameInput = document.getElementById('playerNameInput');
+    
+    // Event listener for homepage "Enter" button
+    enterBtn.addEventListener('pointerdown', () => {
+      homepage.style.display = 'none';
+      menu.style.display = 'block';
+    });
     
     /**********************
      *  HISTORY MANAGEMENT (Mode-Specific)
