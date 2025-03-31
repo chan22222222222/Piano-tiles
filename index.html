@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Piano Tiles Game</title>
+  <!-- Ensure proper mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     * {
       margin: 0;
@@ -15,7 +17,10 @@
       background: #eee;
       user-select: none;
     }
-    /* Home Page Styles */
+
+    /***********************
+     * HOME PAGE STYLES
+     ***********************/
     #home {
       display: flex;
       flex-direction: column;
@@ -40,15 +45,20 @@
       border-radius: 4px;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
-    /* Menu styles */
+
+    /***********************
+     * MENU STYLES
+     ***********************/
     #menu {
-      display: none; /* Hidden until "Enter the Game" is clicked */
-      max-width: 400px;
-      margin: 50px auto;
+      /* Hidden until "Enter the Game" is clicked */
+      display: none;
+      width: 90%;
+      margin: 20px auto;
       padding: 20px;
       background: #fff;
       border: 2px solid #ccc;
       text-align: center;
+      box-sizing: border-box;
     }
     #menu h1, #menu h2 {
       margin-bottom: 10px;
@@ -56,7 +66,7 @@
     #menu div {
       margin-bottom: 20px;
     }
-    /* New Player Name input */
+    /* Player name input */
     #playerNameDiv {
       margin-bottom: 20px;
     }
@@ -71,7 +81,10 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* History section in the menu */
+
+    /***********************
+     * HISTORY SECTION
+     ***********************/
     #historySection {
       margin-top: 20px;
       text-align: left;
@@ -99,30 +112,33 @@
       padding: 2px 6px;
       font-size: 14px;
     }
-    /* Game container styles */
+
+    /***********************
+     * GAME CONTAINER
+     ***********************/
     #gameContainer {
       display: none;
       text-align: center;
       padding: 10px;
     }
-    /* Highest score display */
     #highScore {
       font-size: 20px;
       font-weight: bold;
       margin: 10px 0;
     }
-    /* Game board styles: using responsive width and aspect-ratio */
+    /* Responsive game board */
     #game {
       position: relative;
       margin: 20px auto;
       width: 90%;
       max-width: 320px;
+      /* Maintain 320×480 ratio */
       aspect-ratio: 320 / 480;
       background: #fff;
       border: 2px solid #ccc;
       overflow: hidden;
     }
-    /* Each row is 80px tall on a 480px-high board */
+    /* Each row is 80px tall on a 480px board */
     .row {
       position: absolute;
       width: 100%;
@@ -176,7 +192,10 @@
     #tileSound {
       display: none;
     }
-    /* Responsive adjustments for cellphones */
+
+    /***********************
+     * RESPONSIVE ADJUSTMENTS
+     ***********************/
     @media (max-width: 480px) {
       #home h1 {
         font-size: 36px;
@@ -201,10 +220,9 @@
       #highScore, #score, #message {
         font-size: 16px;
       }
-      /* Scale game board to fit cellphones */
+      /* Let the game fill more width on phones */
       #game {
         width: 95%;
-        max-width: 320px;
       }
     }
   </style>
@@ -234,7 +252,7 @@
       <label><input type="radio" name="musicSource" value="local" checked> Local Library</label>
       <label><input type="radio" name="musicSource" value="youtube"> YouTube URL</label>
       <div id="localMusicDiv" style="margin-top:10px;">
-        <!-- Default now set to "Canon in D - Pachelbel. mp3" -->
+        <!-- Default set to "Canon in D - Pachelbel. mp3" -->
         <select id="localMusicSelect">
           <option value="Canon in D - Pachelbel. mp3">Canon in D - Pachelbel</option>
           <option value="song2.mp3">Song 2</option>
@@ -316,7 +334,7 @@
     const playerNameInput = document.getElementById('playerNameInput');
     
     /**********************
-     *  HISTORY MANAGEMENT (Mode-Specific)
+     *  HISTORY MANAGEMENT
      **********************/
     function loadHistory() {
       const historyJSON = localStorage.getItem(currentHistoryKey);
@@ -404,7 +422,7 @@
     }
     
     /**********************
-     *  HIGH SCORE DISPLAY (Mode-Specific)
+     *  HIGH SCORE DISPLAY
      **********************/
     function updateHighScoreDisplay() {
       let storedHighObj = localStorage.getItem(currentHighScoreKey);
@@ -495,8 +513,10 @@
               scoreDisplay.textContent = 'Score: ' + score;
               checkAndUpdateHighScore(score);
               updateHighScoreDisplay();
+              // Play tile sound
               tileSound.currentTime = 0;
               tileSound.play().catch(err => console.error("Tile sound error:", err));
+              // Optional lyric overlay
               const lyrics = ["La", "Da", "Ti", "Mi", "So", "Fa", "Re", "Do"];
               const randomLyric = lyrics[Math.floor(Math.random() * lyrics.length)];
               const lyricSpan = document.createElement('span');
@@ -518,7 +538,7 @@
         } else {
           tile.addEventListener('pointerdown', () => {
             if (!gameOver) {
-              // Change tile background to red before ending the game
+              // Turn tile red briefly, then end game
               tile.style.background = 'red';
               setTimeout(() => {
                 endGame('You clicked a white tile!');
@@ -539,6 +559,7 @@
       rows.forEach(rowData => {
         rowData.y += dynamicSpeed;
         rowData.el.style.top = rowData.y + 'px';
+        // If a row moves past the bottom (>= 480px) and its black tile is not cleared -> miss
         if (rowData.y >= 480) {
           const blackTile = rowData.el.querySelector('.black');
           if (!blackTile || !blackTile.classList.contains('cleared')) {
@@ -546,6 +567,7 @@
           }
         }
       });
+      // Remove rows that have moved fully out of the game area
       rows = rows.filter(rowData => {
         if (rowData.y > 600) {
           gameDiv.removeChild(rowData.el);
@@ -561,6 +583,7 @@
       restartBtn.style.display = 'inline-block';
       clearInterval(rowSpawnTimer);
       clearInterval(gameLoopInterval);
+      // Save score to local storage
       let history = loadHistory();
       history.push({ name: currentPlayerName, score: score });
       saveHistory(history);
@@ -600,8 +623,8 @@
       currentPlayerName = playerNameInput.value.trim() || "Anonymous";
       
       setDifficultySettings(difficulty);
-      
-      // Set the tile sound based on the selected music source and song
+
+      // Adjust tile sound if user picks Canon
       const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
       if (selectedMusicSource === 'local') {
         const selectedSong = document.getElementById('localMusicSelect').value;
@@ -620,6 +643,7 @@
       initGame();
     });
     
+    // Initialize on load
     updateHistoryDisplay();
     updateHighScoreDisplay();
   </script>
