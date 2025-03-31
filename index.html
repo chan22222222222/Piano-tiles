@@ -484,6 +484,7 @@
               scoreDisplay.textContent = 'Score: ' + score;
               checkAndUpdateHighScore(score);
               updateHighScoreDisplay();
+              // Play the selected piano note on tile click
               tileSound.currentTime = 0;
               tileSound.play().catch(err => console.error("Tile sound error:", err));
               const lyrics = ["La", "Da", "Ti", "Mi", "So", "Fa", "Re", "Do"];
@@ -578,6 +579,7 @@
       updateHighScoreDisplay();
     });
     
+    // Update tile sound based on chosen music when starting the game
     startBtn.addEventListener('pointerdown', () => {
       const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
       currentMode = difficulty;
@@ -586,6 +588,20 @@
       currentPlayerName = playerNameInput.value.trim() || "Anonymous";
       
       setDifficultySettings(difficulty);
+      
+      // Set the tile sound based on the selected music
+      const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
+      if (selectedMusicSource === 'local') {
+        const selectedSong = document.getElementById('localMusicSelect').value;
+        if(selectedSong === "Canon in D - Pachelbel. mp3"){
+          tileSound.src = "canon_note.mp3";
+        } else {
+          tileSound.src = "default_note.mp3";
+        }
+      } else {
+        tileSound.src = "default_note.mp3";
+      }
+      
       menu.style.display = 'none';
       gameContainer.style.display = 'block';
       startMusic();
