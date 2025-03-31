@@ -22,7 +22,7 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background: #eee;
+      background: linear-gradient(to bottom right, skyblue, white, silver);
       text-align: center;
       padding: 0 10px;
     }
@@ -34,6 +34,10 @@
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
+      background-color: white;
+      border: 2px solid silver;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
     /* Menu styles */
     #menu {
@@ -224,7 +228,7 @@
       <label><input type="radio" name="musicSource" value="local" checked> Local Library</label>
       <label><input type="radio" name="musicSource" value="youtube"> YouTube URL</label>
       <div id="localMusicDiv" style="margin-top:10px;">
-        <!-- Default now set to "Canon in D - Pachelbel. mp3" -->
+        <!-- Default now set to "Canon in D - Pachelbel.mp3" -->
         <select id="localMusicSelect">
           <option value="Canon in D - Pachelbel.mp3">Canon in D - Pachelbel</option>
           <option value="song2.mp3">Song 2</option>
@@ -485,7 +489,7 @@
               scoreDisplay.textContent = 'Score: ' + score;
               checkAndUpdateHighScore(score);
               updateHighScoreDisplay();
-              // Play the selected piano note on tile click
+              // Play the tile sound on click
               tileSound.currentTime = 0;
               tileSound.play().catch(err => console.error("Tile sound error:", err));
               // Optionally, show a random lyric overlay
@@ -510,7 +514,6 @@
         } else {
           tile.addEventListener('pointerdown', () => {
             if (!gameOver) {
-              // For wrong click, change background to red and end game after a brief delay
               tile.style.backgroundColor = 'red';
               setTimeout(() => {
                 endGame('You clicked a white tile!');
@@ -521,7 +524,6 @@
         rowEl.appendChild(tile);
       }
       gameDiv.appendChild(rowEl);
-      // Push initial y position (in pixels) based on gameDiv height
       rows.push({ el: rowEl, y: -gameDiv.clientHeight * 0.1667 });
     }
     
@@ -584,7 +586,7 @@
       updateHighScoreDisplay();
     });
     
-    // Update tile sound based on chosen music when starting the game
+    // Start Game: Removed tileSound source update using "canon_note.mp3" and "default_note.mp3"
     startBtn.addEventListener('pointerdown', () => {
       const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
       currentMode = difficulty;
@@ -593,19 +595,6 @@
       currentPlayerName = playerNameInput.value.trim() || "Anonymous";
       
       setDifficultySettings(difficulty);
-      
-      // Set the tile sound based on the selected music source and song
-      const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
-      if (selectedMusicSource === 'local') {
-        const selectedSong = document.getElementById('localMusicSelect').value;
-        if(selectedSong === "Canon in D - Pachelbel.mp3"){
-          tileSound.src = "canon_note.mp3";
-        } else {
-          tileSound.src = "default_note.mp3";
-        }
-      } else {
-        tileSound.src = "default_note.mp3";
-      }
       
       menu.style.display = 'none';
       gameContainer.style.display = 'block';
