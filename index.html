@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Piano Tiles Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
       margin: 0;
@@ -23,6 +24,7 @@
       height: 100vh;
       background: linear-gradient(to bottom right, skyblue, white, silver);
       text-align: center;
+      padding: 0 10px;
     }
     #home h1 {
       font-size: 48px;
@@ -101,6 +103,7 @@
     #gameContainer {
       display: none;
       text-align: center;
+      padding: 10px;
     }
     /* Highest score display */
     #highScore {
@@ -108,16 +111,18 @@
       font-weight: bold;
       margin: 10px 0;
     }
+    /* Game board styles: using responsive width and aspect-ratio */
     #game {
       position: relative;
       margin: 20px auto;
-      width: 320px;   /* 4 columns × 80px each */
-      height: 480px;
-      overflow: hidden;
+      width: 90%;
+      max-width: 320px;
+      aspect-ratio: 320 / 480;
       background: #fff;
       border: 2px solid #ccc;
+      overflow: hidden;
     }
-    /* Each row is 80px tall; 4 equal columns */
+    /* Each row is 80px tall on a 480px-high board */
     .row {
       position: absolute;
       width: 100%;
@@ -164,11 +169,43 @@
     /* Background music styling */
     #bgMusic {
       margin-top: 10px;
-      width: 300px;
+      width: 90%;
+      max-width: 300px;
     }
     /* Hide tile sound controls */
     #tileSound {
       display: none;
+    }
+    /* Responsive adjustments for cellphones */
+    @media (max-width: 480px) {
+      #home h1 {
+        font-size: 36px;
+      }
+      #home button {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
+      #menu h1 {
+        font-size: 24px;
+      }
+      #menu h2 {
+        font-size: 20px;
+      }
+      #playerNameDiv input {
+        font-size: 14px;
+      }
+      button {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+      #highScore, #score, #message {
+        font-size: 16px;
+      }
+      /* Scale game board to fit cellphones */
+      #game {
+        width: 95%;
+        max-width: 320px;
+      }
     }
   </style>
 </head>
@@ -481,7 +518,11 @@
         } else {
           tile.addEventListener('pointerdown', () => {
             if (!gameOver) {
-              endGame('You clicked a white tile!');
+              // Change tile background to red before ending the game
+              tile.style.background = 'red';
+              setTimeout(() => {
+                endGame('You clicked a white tile!');
+              }, 300);
             }
           });
         }
@@ -559,6 +600,20 @@
       currentPlayerName = playerNameInput.value.trim() || "Anonymous";
       
       setDifficultySettings(difficulty);
+      
+      // Set the tile sound based on the selected music source and song
+      const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
+      if (selectedMusicSource === 'local') {
+        const selectedSong = document.getElementById('localMusicSelect').value;
+        if(selectedSong === "Canon in D - Pachelbel. mp3"){
+          tileSound.src = "canon_note.mp3";
+        } else {
+          tileSound.src = "default_note.mp3";
+        }
+      } else {
+        tileSound.src = "default_note.mp3";
+      }
+      
       menu.style.display = 'none';
       gameContainer.style.display = 'block';
       startMusic();
