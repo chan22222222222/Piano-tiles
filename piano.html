@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Piano Tiles Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: #eee;
+      user-select: none;
+    }
+    /* Home Page Styles */
+    #home {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(to bottom right, skyblue, white, silver);
+      text-align: center;
+    }
+    #home h1 {
+      font-size: 48px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+    #home button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      background-color: white;
+      border: 2px solid silver;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    /* Menu styles */
+    #menu {
+      display: none; /* Hidden until "Enter the Game" is clicked */
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border: 2px solid #ccc;
+      text-align: center;
+    }
+    #menu h1, #menu h2 {
+      margin-bottom: 10px;
+    }
+    #menu div {
+      margin-bottom: 20px;
+    }
+    /* New Player Name input */
+    #playerNameDiv {
+      margin-bottom: 20px;
+    }
+    #playerNameDiv input {
+      width: 80%;
+      padding: 6px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    /* History section in the menu */
+    #historySection {
+      margin-top: 20px;
+      text-align: left;
+    }
+    #historySection h3 {
+      margin-bottom: 10px;
+    }
+    #historyList {
+      list-style-type: none;
+      padding-left: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      background: #fafafa;
+    }
+    #historyList li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 8px;
+      border-bottom: 1px dashed #ccc;
+    }
+    #historyList li button {
+      margin: 0;
+      padding: 2px 6px;
+      font-size: 14px;
+    }
+    /* Game container styles */
+    #gameContainer {
+      display: none;
+      text-align: center;
+    }
+    /* Highest score display */
+    #highScore {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    #game {
+      position: relative;
+      margin: 20px auto;
+      width: 320px;   /* 4 columns × 80px each */
+      height: 480px;
+      overflow: hidden;
+      background: #fff;
+      border: 2px solid #ccc;
+    }
+    /* Each row is 80px tall; 4 equal columns */
+    .row {
+      position: absolute;
+      width: 100%;
+      height: 80px;
+      display: flex;
+      left: 0;
+    }
+    .tile {
+      flex: 1;
+      border: 1px solid #ccc;
+      background: white;
+      touch-action: manipulation;
+      cursor: pointer;
+      position: relative;
+    }
+    .black {
+      background: #333;
+    }
+    .cleared {
+      background: yellow !important;
+    }
+    #score {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    #message {
+      font-size: 16px;
+      color: red;
+      height: 20px;
+      margin-top: 10px;
+    }
+    /* Hide YouTube iframe initially */
+    #youtubePlayer {
+      display: none;
+    }
+    /* Container for game buttons */
+    #gameButtons {
+      margin-top: 15px;
+    }
+    #gameButtons button {
+      margin: 5px;
+    }
+    /* Background music styling */
+    #bgMusic {
+      margin-top: 10px;
+      width: 300px;
+    }
+    /* Hide tile sound controls */
+    #tileSound {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Home Page -->
+  <div id="home">
+    <h1>C. Iso Piano Tiles</h1>
+    <button id="enterBtn">Enter the Game</button>
+  </div>
+
+  <!-- Start Menu -->
+  <div id="menu">
+    <h1>Piano Tiles Game</h1>
+    <div>
+      <h2>Select Difficulty</h2>
+      <label><input type="radio" name="difficulty" value="easy" checked> Easy</label>
+      <label><input type="radio" name="difficulty" value="medium"> Medium</label>
+      <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+    </div>
+    <div id="playerNameDiv">
+      <h2>Enter Player Name</h2>
+      <input type="text" id="playerNameInput" placeholder="Your Name" />
+    </div>
+    <div>
+      <h2>Select Music</h2>
+      <label><input type="radio" name="musicSource" value="local" checked> Local Library</label>
+      <label><input type="radio" name="musicSource" value="youtube"> YouTube URL</label>
+      <div id="localMusicDiv" style="margin-top:10px;">
+        <!-- Default now set to "Canon in D - Pachelbel. mp3" -->
+        <select id="localMusicSelect">
+          <option value="Canon in D - Pachelbel. mp3">Canon in D - Pachelbel</option>
+          <option value="song2.mp3">Song 2</option>
+          <option value="song3.mp3">Song 3</option>
+        </select>
+      </div>
+      <div id="youtubeMusicDiv" style="display:none; margin-top:10px;">
+        <input type="text" id="youtubeURL" placeholder="Enter YouTube URL" style="width: 80%;">
+      </div>
+    </div>
+    <button id="startBtn">Start Game</button>
+    <!-- History Section -->
+    <div id="historySection">
+      <h3>Score History</h3>
+      <ul id="historyList"></ul>
+      <button id="deleteHistoryBtn">Delete All History</button>
+      <button id="restoreHistoryBtn">Restore History</button>
+    </div>
+  </div>
+
+  <!-- Game Container -->
+  <div id="gameContainer">
+    <div id="highScore">Highest Score: 0</div>
+    <div id="game"></div>
+    <div id="score">Score: 0</div>
+    <div id="message"></div>
+    <div id="gameButtons">
+      <button id="restartBtn" style="display:none;">Restart</button>
+      <button id="backBtn">Back to Menu</button>
+    </div>
+    <!-- Background music with visible controls -->
+    <audio id="bgMusic" autoplay preload="auto" controls></audio>
+    <!-- Tile sound effect (hidden) -->
+    <audio id="tileSound" src="tile.mp3" preload="auto"></audio>
+    <!-- YouTube iframe for YouTube music (hidden) -->
+    <iframe id="youtubePlayer" width="0" height="0" frameborder="0" allow="autoplay"></iframe>
+  </div>
+
+  <script>
+    /**********************
+     *  HOME PAGE TRANSITION
+     **********************/
+    const home = document.getElementById('home');
+    const enterBtn = document.getElementById('enterBtn');
+    const menu = document.getElementById('menu');
+    enterBtn.addEventListener('pointerdown', () => {
+      home.style.display = 'none';
+      menu.style.display = 'block';
+    });
+
+    /**********************
+     *  GLOBAL MODE VARIABLES
+     **********************/
+    let currentMode = "easy"; 
+    let currentHistoryKey = "pianoTilesHistory_easy";
+    let currentHighScoreKey = "pianoTilesHighScore_easy";
+    let lastHistoryBackup = null;
+    let currentPlayerName = "Anonymous";
+    
+    /**********************
+     *  DOM ELEMENTS
+     **********************/
+    const startBtn = document.getElementById('startBtn');
+    const localMusicDiv = document.getElementById('localMusicDiv');
+    const youtubeMusicDiv = document.getElementById('youtubeMusicDiv');
+    const gameContainer = document.getElementById('gameContainer');
+    const gameDiv = document.getElementById('game');
+    const highScoreDisplay = document.getElementById('highScore');
+    const scoreDisplay = document.getElementById('score');
+    const messageDisplay = document.getElementById('message');
+    const restartBtn = document.getElementById('restartBtn');
+    const backBtn = document.getElementById('backBtn');
+    const deleteHistoryBtn = document.getElementById('deleteHistoryBtn');
+    const restoreHistoryBtn = document.getElementById('restoreHistoryBtn');
+    const historyList = document.getElementById('historyList');
+    const bgMusic = document.getElementById('bgMusic');
+    const tileSound = document.getElementById('tileSound');
+    const youtubePlayer = document.getElementById('youtubePlayer');
+    const playerNameInput = document.getElementById('playerNameInput');
+    
+    /**********************
+     *  HISTORY MANAGEMENT (Mode-Specific)
+     **********************/
+    function loadHistory() {
+      const historyJSON = localStorage.getItem(currentHistoryKey);
+      return historyJSON ? JSON.parse(historyJSON) : [];
+    }
+    function saveHistory(history) {
+      localStorage.setItem(currentHistoryKey, JSON.stringify(history));
+    }
+    function updateHistoryDisplay() {
+      const history = loadHistory();
+      historyList.innerHTML = '';
+      if (history.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No history yet.';
+        historyList.appendChild(li);
+      } else {
+        history.forEach((entry, index) => {
+          const li = document.createElement('li');
+          li.textContent = `${entry.name}: ${entry.score}`;
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'x';
+          delBtn.addEventListener('pointerdown', () => {
+            lastHistoryBackup = loadHistory();
+            let historyArr = loadHistory();
+            historyArr.splice(index, 1);
+            saveHistory(historyArr);
+            updateHistoryDisplay();
+            updateHighScoreDisplay();
+          });
+          li.appendChild(delBtn);
+          historyList.appendChild(li);
+        });
+      }
+    }
+    deleteHistoryBtn.addEventListener('pointerdown', () => {
+      lastHistoryBackup = loadHistory();
+      localStorage.removeItem(currentHistoryKey);
+      updateHistoryDisplay();
+      updateHighScoreDisplay();
+    });
+    restoreHistoryBtn.addEventListener('pointerdown', () => {
+      if(lastHistoryBackup !== null) {
+        saveHistory(lastHistoryBackup);
+        updateHistoryDisplay();
+        updateHighScoreDisplay();
+        lastHistoryBackup = null;
+      }
+    });
+    
+    /**********************
+     *  MUSIC SELECTION
+     **********************/
+    document.getElementsByName('musicSource').forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'local' && radio.checked) {
+          localMusicDiv.style.display = 'block';
+          youtubeMusicDiv.style.display = 'none';
+        } else if (radio.value === 'youtube' && radio.checked) {
+          localMusicDiv.style.display = 'none';
+          youtubeMusicDiv.style.display = 'block';
+        }
+      });
+    });
+    function extractYouTubeID(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+    function startMusic() {
+      const selectedMusicSource = document.querySelector('input[name="musicSource"]:checked').value;
+      if (selectedMusicSource === 'local') {
+        const selectedSong = document.getElementById('localMusicSelect').value;
+        bgMusic.src = selectedSong;
+        bgMusic.play().catch(err => console.error("Error playing local music:", err));
+      } else if (selectedMusicSource === 'youtube') {
+        const youtubeURL = document.getElementById('youtubeURL').value;
+        const videoID = extractYouTubeID(youtubeURL);
+        if (videoID) {
+          youtubePlayer.style.display = 'block';
+          youtubePlayer.src = 'https://www.youtube.com/embed/' + videoID + '?autoplay=1&controls=0';
+        } else {
+          console.error("Invalid YouTube URL.");
+        }
+      }
+    }
+    
+    /**********************
+     *  HIGH SCORE DISPLAY (Mode-Specific)
+     **********************/
+    function updateHighScoreDisplay() {
+      let storedHighObj = localStorage.getItem(currentHighScoreKey);
+      if (storedHighObj) {
+        try {
+          let obj = JSON.parse(storedHighObj);
+          if (obj && typeof obj === 'object' && 'score' in obj && 'name' in obj) {
+            highScoreDisplay.textContent = 'Highest Score: ' + obj.score + " by " + obj.name;
+          } else {
+            highScoreDisplay.textContent = 'Highest Score: 0';
+          }
+        } catch(e) {
+          highScoreDisplay.textContent = 'Highest Score: 0';
+        }
+      } else {
+        highScoreDisplay.textContent = 'Highest Score: 0';
+      }
+    }
+    function getStoredHighScore() {
+      const stored = localStorage.getItem(currentHighScoreKey);
+      try {
+        const obj = JSON.parse(stored);
+        if(obj && typeof obj === "object" && "score" in obj) {
+          return obj.score;
+        }
+        return 0;
+      } catch(e) {
+        return 0;
+      }
+    }
+    function checkAndUpdateHighScore(newScore) {
+      let storedHigh = getStoredHighScore();
+      if(newScore > storedHigh) {
+        localStorage.setItem(currentHighScoreKey, JSON.stringify({ name: currentPlayerName, score: newScore }));
+      }
+    }
+    
+    /**********************
+     *  GAME VARIABLES & LOGIC
+     **********************/
+    let baseSpeed = 2;
+    let spawnInterval = 800;
+    let score = 0;
+    let gameOver = false;
+    let rowSpawnTimer;
+    let gameLoopInterval;
+    let rows = [];
+    
+    function setDifficultySettings(difficulty) {
+      if (difficulty === 'easy') {
+        baseSpeed = 2;
+        spawnInterval = 800;
+      } else if (difficulty === 'medium') {
+        baseSpeed = 3;
+        spawnInterval = 600;
+      } else if (difficulty === 'hard') {
+        baseSpeed = 4;
+        spawnInterval = 400;
+      }
+    }
+    
+    function initGame() {
+      score = 0;
+      gameOver = false;
+      rows = [];
+      messageDisplay.textContent = '';
+      scoreDisplay.textContent = 'Score: 0';
+      restartBtn.style.display = 'none';
+      gameDiv.innerHTML = '';
+      updateHighScoreDisplay();
+      rowSpawnTimer = setInterval(spawnRow, spawnInterval);
+      gameLoopInterval = setInterval(gameLoop, 16);
+    }
+    
+    function spawnRow() {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'row';
+      const blackIndex = Math.floor(Math.random() * 4);
+      for (let i = 0; i < 4; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        if (i === blackIndex) {
+          tile.classList.add('black');
+          tile.addEventListener('pointerdown', () => {
+            if (!gameOver && !tile.classList.contains('cleared')) {
+              tile.classList.add('cleared');
+              score++;
+              scoreDisplay.textContent = 'Score: ' + score;
+              checkAndUpdateHighScore(score);
+              updateHighScoreDisplay();
+              tileSound.currentTime = 0;
+              tileSound.play().catch(err => console.error("Tile sound error:", err));
+              const lyrics = ["La", "Da", "Ti", "Mi", "So", "Fa", "Re", "Do"];
+              const randomLyric = lyrics[Math.floor(Math.random() * lyrics.length)];
+              const lyricSpan = document.createElement('span');
+              lyricSpan.textContent = randomLyric;
+              lyricSpan.style.position = "absolute";
+              lyricSpan.style.top = "50%";
+              lyricSpan.style.left = "50%";
+              lyricSpan.style.transform = "translate(-50%, -50%)";
+              lyricSpan.style.color = "white";
+              lyricSpan.style.fontSize = "16px";
+              tile.appendChild(lyricSpan);
+              setTimeout(() => {
+                if (tile.contains(lyricSpan)) {
+                  tile.removeChild(lyricSpan);
+                }
+              }, 800);
+            }
+          });
+        } else {
+          tile.addEventListener('pointerdown', () => {
+            if (!gameOver) {
+              endGame('You clicked a white tile!');
+            }
+          });
+        }
+        rowEl.appendChild(tile);
+      }
+      rowEl.style.top = '-80px';
+      gameDiv.appendChild(rowEl);
+      rows.push({ el: rowEl, y: -80 });
+    }
+    
+    function gameLoop() {
+      if (gameOver) return;
+      const dynamicSpeed = baseSpeed + (score / 10);
+      rows.forEach(rowData => {
+        rowData.y += dynamicSpeed;
+        rowData.el.style.top = rowData.y + 'px';
+        if (rowData.y >= 480) {
+          const blackTile = rowData.el.querySelector('.black');
+          if (!blackTile || !blackTile.classList.contains('cleared')) {
+            endGame('You missed a black tile!');
+          }
+        }
+      });
+      rows = rows.filter(rowData => {
+        if (rowData.y > 600) {
+          gameDiv.removeChild(rowData.el);
+          return false;
+        }
+        return true;
+      });
+    }
+    
+    function endGame(msg) {
+      gameOver = true;
+      messageDisplay.textContent = 'Game Over! ' + msg;
+      restartBtn.style.display = 'inline-block';
+      clearInterval(rowSpawnTimer);
+      clearInterval(gameLoopInterval);
+      let history = loadHistory();
+      history.push({ name: currentPlayerName, score: score });
+      saveHistory(history);
+      updateHistoryDisplay();
+      checkAndUpdateHighScore(score);
+      updateHighScoreDisplay();
+    }
+    
+    restartBtn.addEventListener('pointerdown', () => {
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+      youtubePlayer.src = '';
+      youtubePlayer.style.display = 'none';
+      initGame();
+      startMusic();
+    });
+    
+    backBtn.addEventListener('pointerdown', () => {
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+      youtubePlayer.src = '';
+      youtubePlayer.style.display = 'none';
+      clearInterval(rowSpawnTimer);
+      clearInterval(gameLoopInterval);
+      gameDiv.innerHTML = '';
+      gameContainer.style.display = 'none';
+      menu.style.display = 'block';
+      updateHistoryDisplay();
+      updateHighScoreDisplay();
+    });
+    
+    startBtn.addEventListener('pointerdown', () => {
+      const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+      currentMode = difficulty;
+      currentHistoryKey = "pianoTilesHistory_" + currentMode;
+      currentHighScoreKey = "pianoTilesHighScore_" + currentMode;
+      currentPlayerName = playerNameInput.value.trim() || "Anonymous";
+      
+      setDifficultySettings(difficulty);
+      menu.style.display = 'none';
+      gameContainer.style.display = 'block';
+      startMusic();
+      initGame();
+    });
+    
+    updateHistoryDisplay();
+    updateHighScoreDisplay();
+  </script>
+</body>
+</html>
